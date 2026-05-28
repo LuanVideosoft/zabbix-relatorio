@@ -61,16 +61,18 @@ st.set_page_config(
     layout="centered"
 )
 
-col1, col2 = st.columns([1,5])
+col1, col2 = st.columns([1,4])
 
 with col1:
-    st.image("./logo.png", width=90)
+    st.markdown("<div style='margin-top:20px'></div>", unsafe_allow_html=True)
+    st.image("./logo.png", width=100)
 
 with col2:
     st.markdown("""
         <h1 style='
-            margin-top:10px;
-            font-size:42px;
+            margin-top:0px;
+            padding-top:18px;
+            font-size:48px;
         '>
         Relatório Operacional Totem
         </h1>

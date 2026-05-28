@@ -78,7 +78,7 @@ st.markdown(f"""
 
     <img src="data:image/png;base64,{logo_base64}" width="100">
 
-    div>
+    <div>
 
         <h1 style="
             margin:0;

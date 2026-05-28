@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import urllib3
-import base64
+
 
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -62,36 +62,36 @@ st.set_page_config(
     layout="centered"
 )
 
+import base64
+
 def get_base64_image(image_path):
     with open(image_path, "rb") as img:
         return base64.b64encode(img.read()).decode()
 
-logo_base64 = get_base64_image("./logo.png")
+logo_base64 = get_base64_image("logo.png")
 
 st.markdown(f"""
 <div style="
     display:flex;
     align-items:center;
-    gap:25px;
+    gap:20px;
     margin-bottom:30px;
-    flex-wrap:wrap;
 ">
 
-    <img src="data:image/png;base64,{logo_base64}" width="100">
+    <img src="data:image/png;base64,{logo_base64}" width="90">
 
     <div>
 
         <h1 style="
             margin:0;
-            padding:0;
-            font-size:48px;
             color:white;
+            font-size:42px;
         ">
             Relatório Operacional Totem
         </h1>
 
         <p style="
-            margin-top:8px;
+            margin-top:5px;
             color:gray;
             font-size:16px;
         ">

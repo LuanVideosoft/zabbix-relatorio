@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import urllib3
+import base64
 
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -61,22 +62,37 @@ st.set_page_config(
     layout="centered"
 )
 
-col1, col2 = st.columns([1,4])
+def get_base64_image(image_path):
+    with open(image_path, "rb") as img:
+        return base64.b64encode(img.read()).decode()
 
-with col1:
-    st.markdown("<div style='margin-top:20px'></div>", unsafe_allow_html=True)
-    st.image("./logo.png", width=100)
+st.markdown("""
+    <div style="
+        display:flex;
+        align-items:center;
+        gap:20px;
+        margin-bottom:30px;
+    ">
+        <img src="data:image/png;base64,{}" width="90">
+        <div>
+            <h1 style="
+                margin:0;
+                padding:0;
+                font-size:42px;
+            ">
+                Relatório Operacional Totem
+            </h1>
 
-with col2:
-    st.markdown("""
-        <h1 style='
-            margin-top:0px;
-            padding-top:18px;
-            font-size:48px;
-        '>
-        Relatório Operacional Totem
-        </h1>
-    """, unsafe_allow_html=True)
+            <p style="
+                margin-top:5px;
+                color:gray;
+                font-size:16px;
+            ">
+                Videosoft • Sistema Operacional Zabbix
+            </p>
+        </div>
+    </div>
+""".format(get_base64_image("./logo.png")), unsafe_allow_html=True)
 
 serial = st.text_input(
     "Número de Série do Totem"

@@ -66,33 +66,41 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as img:
         return base64.b64encode(img.read()).decode()
 
-st.markdown("""
-    <div style="
-        display:flex;
-        align-items:center;
-        gap:20px;
-        margin-bottom:30px;
-    ">
-        <img src="data:image/png;base64,{}" width="90">
-        <div>
-            <h1 style="
-                margin:0;
-                padding:0;
-                font-size:42px;
-            ">
-                Relatório Operacional Totem
-            </h1>
+logo_base64 = get_base64_image("./logo.png")
 
-            <p style="
-                margin-top:5px;
-                color:gray;
-                font-size:16px;
-            ">
-                Videosoft • Sistema Operacional Zabbix
-            </p>
-        </div>
+st.markdown(f"""
+<div style="
+    display:flex;
+    align-items:center;
+    gap:25px;
+    margin-bottom:30px;
+">
+
+    <img src="data:image/png;base64,{logo_base64}" width="100">
+
+    <div>
+
+        <h1 style="
+            margin:0;
+            padding:0;
+            font-size:48px;
+            color:white;
+        ">
+            Relatório Operacional Totem
+        </h1>
+
+        <p style="
+            margin-top:8px;
+            color:gray;
+            font-size:16px;
+        ">
+            Videosoft • Sistema Operacional Zabbix
+        </p>
+
     </div>
-""".format(get_base64_image("./logo.png")), unsafe_allow_html=True)
+
+</div>
+""", unsafe_allow_html=True)
 
 serial = st.text_input(
     "Número de Série do Totem"

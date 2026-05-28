@@ -74,6 +74,7 @@ st.markdown(f"""
     align-items:center;
     gap:25px;
     margin-bottom:30px;
+    flex-wrap:wrap;
 ">
 
     <img src="data:image/png;base64,{logo_base64}" width="100">

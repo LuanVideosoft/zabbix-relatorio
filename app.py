@@ -74,7 +74,7 @@ with col2:
     # Relatório Operacional Totem
 
     <span style='color:gray'>
-    Videosoft • Sistema Operacional Zabbix
+    Videosoft • 
     </span>
     """, unsafe_allow_html=True)
 

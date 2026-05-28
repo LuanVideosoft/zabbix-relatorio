@@ -70,7 +70,7 @@ def get_base64_image(image_path):
 
 logo_base64 = get_base64_image("logo.png")
 
-st.markdown(f"""
+header_html = f"""
 <div style="
     display:flex;
     align-items:center;
@@ -81,7 +81,6 @@ st.markdown(f"""
     <img src="data:image/png;base64,{logo_base64}" width="90">
 
     <div>
-
         <h1 style="
             margin:0;
             color:white;
@@ -97,11 +96,12 @@ st.markdown(f"""
         ">
             Videosoft • Sistema Operacional Zabbix
         </p>
-
     </div>
 
 </div>
-""", unsafe_allow_html=True)
+"""
+
+st.markdown(header_html, unsafe_allow_html=True)
 
 serial = st.text_input(
     "Número de Série do Totem"

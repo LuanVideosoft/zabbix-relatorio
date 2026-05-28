@@ -61,7 +61,16 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("📊 Relatório Operacional Totem")
+col1, col2 = st.columns([1,4])
+
+with col1:
+    st.image("logo.png", width=120)
+
+with col2:
+    st.markdown(
+        "<h1 style='margin-top:20px;'>Relatório Operacional Totem</h1>",
+        unsafe_allow_html=True
+    )
 
 serial = st.text_input(
     "Número de Série do Totem"

@@ -29,7 +29,18 @@ ZABBIX_URL = "https://noc-totens.videosoft.com.br/api_jsonrpc.php"
 
 TOKEN = st.secrets["TOKEN"]
 
-DIAS_ANALISE = 30
+DIAS_ANALISE = 7
+
+# Não exibir eventos de severidade N5 (Informação)
+EXIBIR_N5 = False
+
+# Eventos de boot/uptime não serão exibidos nem contabilizados,
+# pois também podem representar apenas a ligação normal do totem.
+TERMOS_INICIALIZACAO = (
+    "reiniciado",
+    "uptime < 10m",
+    "boot"
+)
 
 # ==========================================
 # API ZABBIX
@@ -332,30 +343,78 @@ if st.button("Gerar Relatório"):
 
             lista_eventos = []
 
+            # Mapeamento da API para os níveis utilizados no Zabbix:
+            # prioridade 1 = N5 (Informação)
+            # prioridade 2 = N4 (Baixo)
+            # prioridade 3 = N3 (Médio)
+            # prioridade 4 = N2 (Alto)
+            # prioridade 5 = N1 (Crítico)
+            mapa_severidade = {
+                "0": "Não classificada",
+                "1": "N5",
+                "2": "N4",
+                "3": "N3",
+                "4": "N2",
+                "5": "N1"
+            }
+
             if "result" in eventos_data:
 
                 for evento in eventos_data["result"]:
 
                     nome = evento["name"]
+                    nome_normalizado = nome.lower()
+
+                    # Não exibir eventos de inicialização, boot ou uptime.
+                    if any(
+                        termo in nome_normalizado
+                        for termo in TERMOS_INICIALIZACAO
+                    ):
+                        continue
+
+                    trigger_id = evento["objectid"]
+
+                    trigger_data = zabbix_api(
+                        "trigger.get",
+                        {
+                            "triggerids": trigger_id,
+                            "output": [
+                                "triggerid",
+                                "priority"
+                            ]
+                        }
+                    )
+
+                    if "error" in trigger_data:
+                        continue
+
+                    triggers = trigger_data.get("result", [])
+
+                    if not triggers:
+                        continue
+
+                    prioridade_atual = str(
+                        triggers[0]["priority"]
+                    )
+
+                    # Remove N5 usando a prioridade atual do trigger.
+                    if (
+                        not EXIBIR_N5
+                        and prioridade_atual == "1"
+                    ):
+                        continue
 
                     data_evento = datetime.fromtimestamp(
                         int(evento["clock"])
                     ).strftime("%d/%m/%Y %H:%M")
 
-                    severidade = evento["severity"]
-
-                    mapa_severidade = {
-                        "0": "N0",
-                        "1": "N1",
-                        "2": "N2",
-                        "3": "N3",
-                        "4": "N4",
-                        "5": "N5"
-                    }
+                    severidade_evento = str(
+                        evento["severity"]
+                    )
 
                     severidade_texto = mapa_severidade.get(
-                        severidade,
-                        severidade
+                        severidade_evento,
+                        "N/A"
                     )
 
                     lista_eventos.append([
@@ -370,34 +429,14 @@ if st.button("Gerar Relatório"):
 
             total_eventos = len(lista_eventos)
 
-            reinicializacoes = 0
             usb_eventos = 0
             eventos_temperatura = 0
             eventos_disco = 0
             eventos_memoria = 0
 
-            dias_reboot = {}
-
             for evento in lista_eventos:
 
                 nome = evento[1].lower()
-
-                # REBOOT
-
-                if (
-                    "reiniciado" in nome
-                    or "uptime < 10m" in nome
-                    or "boot" in nome
-                ):
-
-                    reinicializacoes += 1
-
-                    data_reboot = evento[0].split(" ")[0]
-
-                    if data_reboot not in dias_reboot:
-                        dias_reboot[data_reboot] = 0
-
-                    dias_reboot[data_reboot] += 1
 
                 # USB
 
@@ -443,22 +482,6 @@ if st.button("Gerar Relatório"):
                     eventos_memoria += 1
 
             # ======================================
-            # DIA COM MAIS REBOOTS
-            # ======================================
-
-            dia_mais_reboots = "N/A"
-
-            maior_qtd = 0
-
-            for dia, qtd in dias_reboot.items():
-
-                if qtd > maior_qtd:
-
-                    maior_qtd = qtd
-
-                    dia_mais_reboots = dia
-
-            # ======================================
             # CONCLUSÃO
             # ======================================
 
@@ -468,16 +491,6 @@ if st.button("Gerar Relatório"):
 
                 conclusoes.append(
                     "Não foram identificadas ocorrências operacionais durante o período analisado."
-                )
-
-            if reinicializacoes > 0:
-
-                conclusoes.append(
-                    f"Foram identificadas {reinicializacoes} possíveis reinicializações."
-                )
-
-                conclusoes.append(
-                    f"O maior volume ocorreu em {dia_mais_reboots}, totalizando {maior_qtd} eventos."
                 )
 
             if usb_eventos > 0:
@@ -599,13 +612,7 @@ if st.button("Gerar Relatório"):
                  str(eventos_disco)],
 
                 ["Eventos memória",
-                 str(eventos_memoria)],
-
-                ["Possíveis reinicializações",
-                 str(reinicializacoes)],
-
-                ["Dia com mais reinicializações",
-                 f"{dia_mais_reboots} ({maior_qtd})"]
+                 str(eventos_memoria)]
             ]
 
             tabela_resumo = Table(
@@ -775,4 +782,3 @@ if st.button("Gerar Relatório"):
                 file_name=f"{HOST_NAME}_relatorio.pdf",
                 mime="application/pdf"
             )
-

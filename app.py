@@ -34,12 +34,15 @@ DIAS_ANALISE = 7
 # Não exibir eventos de severidade N5 (Informação)
 EXIBIR_N5 = False
 
-# Eventos de boot/uptime não serão exibidos nem contabilizados,
-# pois também podem representar apenas a ligação normal do totem.
-TERMOS_INICIALIZACAO = (
+# Eventos abaixo não serão exibidos nem contabilizados.
+# Eles podem representar apenas a ligação/desligamento normal do totem
+# ou a indisponibilidade esperada do agente enquanto o equipamento está desligado.
+TERMOS_EVENTOS_IGNORADOS = (
     "reiniciado",
     "uptime < 10m",
-    "boot"
+    "boot",
+    "active checks are not available",
+    "verificações ativas não estão disponíveis"
 )
 
 # ==========================================
@@ -365,10 +368,11 @@ if st.button("Gerar Relatório"):
                     nome = evento["name"]
                     nome_normalizado = nome.lower()
 
-                    # Não exibir eventos de inicialização, boot ou uptime.
+                    # Não exibir eventos que não representam,
+                    # isoladamente, uma falha operacional do equipamento.
                     if any(
                         termo in nome_normalizado
-                        for termo in TERMOS_INICIALIZACAO
+                        for termo in TERMOS_EVENTOS_IGNORADOS
                     ):
                         continue
 

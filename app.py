@@ -42,7 +42,8 @@ TERMOS_EVENTOS_IGNORADOS = (
     "uptime < 10m",
     "boot",
     "active checks are not available",
-    "verificações ativas não estão disponíveis"
+    "verificações ativas não estão disponíveis",
+    "sem comunicação por mais de 2 minutos"
 )
 
 # ==========================================

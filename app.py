@@ -520,7 +520,7 @@ if st.button(
             )
 
             st.success(
-                f"Host encontrado: {HOST_NAME}"
+                "Totem localizado com sucesso."
             )
 
             # ==================================
@@ -742,137 +742,6 @@ if st.button(
                 "Temperatura Core 0": temperatura_core0,
                 "Temperatura Core 1": temperatura_core1,
             }
-
-            # ==================================
-            # QUALIDADE DO INVENTÁRIO
-            # ==================================
-
-            campos_avaliados = {
-                "Processador": processador,
-                "Memória": memoria,
-                "SSD": modelo_ssd,
-                "Impressora": impressora,
-                "Pinpad": pinpad,
-                "Touch": touch,
-            }
-
-            campos_encontrados = sum(
-                1
-                for valor in campos_avaliados.values()
-                if valor_hardware_valido(valor)
-            )
-
-            total_campos_avaliados = len(
-                campos_avaliados
-            )
-
-            percentual_inventario = round(
-                (
-                    campos_encontrados
-                    / total_campos_avaliados
-                ) * 100
-            )
-
-            if percentual_inventario == 100:
-                qualidade_inventario = "Completo"
-                icone_inventario = "🟢"
-
-            elif percentual_inventario >= 50:
-                qualidade_inventario = "Parcial"
-                icone_inventario = "🟡"
-
-            else:
-                qualidade_inventario = "Incompleto"
-                icone_inventario = "🔴"
-
-            # Mostra uma prévia no Streamlit.
-            st.subheader(
-                "Totem consultado"
-            )
-
-            coluna_host, coluna_nome, coluna_status = st.columns(
-                [1, 2, 1]
-            )
-
-            coluna_host.metric(
-                "Host",
-                HOST_NAME,
-            )
-
-            coluna_nome.metric(
-                "Nome visível",
-                nome_visivel,
-            )
-
-            coluna_status.metric(
-                "Cadastro no Zabbix",
-                status_host_texto,
-            )
-
-            st.caption(
-                "Consulta feita por correspondência exata do nome técnico "
-                f"do host: {host_pesquisado}."
-            )
-
-            st.subheader(
-                "Inventário localizado"
-            )
-
-            st.dataframe(
-                {
-                    "Campo": list(
-                        resultado.keys()
-                    ),
-                    "Valor": list(
-                        resultado.values()
-                    ),
-                },
-                use_container_width=True,
-                hide_index=True,
-            )
-
-            st.markdown(
-                f"### {icone_inventario} Status do inventário"
-            )
-
-            st.progress(
-                percentual_inventario / 100
-            )
-
-            st.write(
-                f"**{qualidade_inventario} "
-                f"({percentual_inventario}%)** — "
-                f"{campos_encontrados} de "
-                f"{total_campos_avaliados} campos encontrados."
-            )
-
-            for nome_campo, valor_campo in campos_avaliados.items():
-                if valor_hardware_valido(valor_campo):
-                    st.write(
-                        f"✅ {nome_campo}"
-                    )
-                else:
-                    st.write(
-                        f"❌ {nome_campo}"
-                    )
-
-            with st.expander(
-                "Ver origem dos dados de hardware"
-            ):
-                st.write(
-                    f"**Processador:** "
-                    f"{origem_processador}"
-                )
-
-                st.write(
-                    f"**Memória:** "
-                    f"{origem_memoria}"
-                )
-
-                st.write(
-                    f"**SSD:** "
-                    f"{origem_ssd}"
-                )
 
             # ==================================
             # TEMPERATURA CPU
@@ -1200,113 +1069,6 @@ if st.button(
             )
 
             # ==================================
-            # DIAGNÓSTICO OPERACIONAL
-            # ==================================
-
-            eventos_n1_n2 = sum(
-                1
-                for evento in lista_eventos
-                if evento[2] in ("N1", "N2")
-            )
-
-            if (
-                temperatura_cpu >= 85
-                or eventos_n1_n2 > 0
-                or eventos_disco >= 10
-            ):
-                status_operacional = "CRÍTICO"
-                icone_operacional = "🔴"
-                texto_operacional = (
-                    "O equipamento apresenta ocorrências "
-                    "que exigem atenção imediata."
-                )
-
-            elif (
-                total_eventos > 0
-                or temperatura_cpu >= 70
-                or percentual_inventario < 100
-            ):
-                status_operacional = "ATENÇÃO"
-                icone_operacional = "🟡"
-                texto_operacional = (
-                    "Foram encontrados pontos que merecem "
-                    "acompanhamento ou validação."
-                )
-
-            else:
-                status_operacional = "SAUDÁVEL"
-                icone_operacional = "🟢"
-                texto_operacional = (
-                    "Nenhuma anomalia operacional relevante "
-                    "foi identificada."
-                )
-
-            st.divider()
-
-            st.subheader(
-                "Diagnóstico rápido"
-            )
-
-            col_status, col_eventos, col_temperatura = st.columns(
-                3
-            )
-
-            col_status.metric(
-                "Status operacional",
-                f"{icone_operacional} {status_operacional}",
-            )
-
-            col_eventos.metric(
-                f"Eventos em {DIAS_ANALISE} dias",
-                total_eventos,
-            )
-
-            temperatura_exibicao = (
-                f"{temperatura_cpu} °C"
-                if temperatura_cpu > 0
-                else "Sem dado"
-            )
-
-            col_temperatura.metric(
-                "Temperatura CPU",
-                temperatura_exibicao,
-            )
-
-            st.info(
-                texto_operacional
-            )
-
-            if eventos_n1_n2 > 0:
-                st.write(
-                    f"⚠️ Eventos N1/N2 encontrados: "
-                    f"{eventos_n1_n2}"
-                )
-
-            if eventos_disco > 0:
-                st.write(
-                    f"💾 Eventos de disco/IO: "
-                    f"{eventos_disco}"
-                )
-
-            if eventos_memoria > 0:
-                st.write(
-                    f"🧠 Eventos de memória: "
-                    f"{eventos_memoria}"
-                )
-
-            if eventos_temperatura > 0:
-                st.write(
-                    f"🌡️ Eventos de temperatura: "
-                    f"{eventos_temperatura}"
-                )
-
-            if usb_eventos > 0:
-                st.write(
-                    f"🔌 Eventos de USB/periféricos: "
-                    f"{usb_eventos}"
-                )
-
-            # ==================================
             # PDF
             # ==================================
 
@@ -1364,17 +1126,6 @@ if st.button(
                 [
                     "Período analisado",
                     f"{DIAS_ANALISE} dias",
-                ],
-                [
-                    "Status operacional",
-                    status_operacional,
-                ],
-                [
-                    "Qualidade do inventário",
-                    (
-                        f"{qualidade_inventario} "
-                        f"({percentual_inventario}%)"
-                    ),
                 ],
                 [
                     "Total de eventos",
@@ -1737,6 +1488,10 @@ if st.button(
             )
 
             buffer.seek(0)
+
+            st.success(
+                "Relatório gerado com sucesso."
+            )
 
             st.download_button(
                 label=(
